@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String
+  email        String   @unique
+  passwordHash String
+
+  avatar       String?
+
+  cars         Car[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Car {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+
+  name        String
+  plateNumber String
+
+  mileage     Int
+
+  bodyType    BodyType
+
+  color       String
+
+  fuelType    FuelType
+
+  image       String?
+
+  maintenances Maintenance[]
+  expenses     Expense[]
+
+  createdAt   DateTime @default(now())
+}
+
+model Maintenance {
+  id          String   @id @default(cuid())
+
+  carId       String
+  car         Car @relation(fields: [carId], references: [id])
+
+  mileage     Int
+
+  description String
+
+  cost        Float
+
+  serviceDate DateTime
+
+  createdAt   DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+
+  carId       String
+  car         Car @relation(fields: [carId], references: [id])
+
+  mileage     Int
+
+  title       String
+
+  description String?
+
+  cost        Float
+
+  expenseDate DateTime
+
+  createdAt   DateTime @default(now())
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  HYBRID
+  ELECTRIC
+}
+
+enum BodyType {
+  SEDAN
+  CROSSOVER
+  SUV
+}
