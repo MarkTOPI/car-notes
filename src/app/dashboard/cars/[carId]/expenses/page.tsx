@@ -1,20 +1,16 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
-import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
+import { ExpensesList } from "@/components/expenses/expenses-list";
 
 type Props = {
   params: Promise<{
     carId: string;
   }>;
 };
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("ru-RU").format(date);
-}
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat("ru-RU", {
@@ -51,10 +47,9 @@ export default async function ExpensesPage({ params }: Props) {
     notFound();
   }
 
-  const total = car.expenses.reduce(
-    (sum, item) => sum + item.cost,
-    0
-  );
+  const total = car.expenses.reduce((sum, item) => {
+    return sum + item.cost;
+  }, 0);
 
   return (
     <main className="min-h-screen bg-white px-4 py-6 text-black dark:bg-black dark:text-white sm:px-6 lg:px-8">
@@ -118,54 +113,18 @@ export default async function ExpensesPage({ params }: Props) {
             </Link>
           </section>
         ) : (
-          <section className="grid gap-4">
-            {car.expenses.map((item) => (
-              <article
-                key={item.id}
-                className="rounded-[2rem] border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-950 sm:p-6"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-sm text-neutral-500">
-                      {formatDate(item.expenseDate)}
-                    </p>
-
-                    <h2 className="mt-2 text-xl font-semibold">
-                      {item.title}
-                    </h2>
-
-                    <p className="mt-1 text-sm text-neutral-500">
-                      Пробег: {item.mileage.toLocaleString("ru-RU")} км
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
-                      {formatMoney(item.cost)}
-                    </div>
-
-                    <Link
-                      href={`/dashboard/cars/${car.id}/expenses/${item.id}/edit`}
-                      className="rounded-full border border-neutral-200 px-4 py-2 text-sm transition hover:bg-neutral-100 dark:border-neutral-800 dark:hover:bg-neutral-900"
-                    >
-                      Редактировать
-                    </Link>
-
-                    <DeleteExpenseButton
-                      carId={car.id}
-                      expenseId={item.id}
-                    />
-                  </div>
-                </div>
-
-                {item.description && (
-                  <p className="mt-5 whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
-                    {item.description}
-                  </p>
-                )}
-              </article>
-            ))}
-          </section>
+          <ExpensesList
+            carId={car.id}
+            expenses={car.expenses.map((item) => ({
+              id: item.id,
+              carId: item.carId,
+              title: item.title,
+              expenseDate: item.expenseDate.toISOString(),
+              mileage: item.mileage,
+              description: item.description,
+              cost: item.cost,
+            }))}
+          />
         )}
       </div>
     </main>
