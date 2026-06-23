@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
+import { DeleteCarButton } from "@/components/cars/delete-car-button";
 
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
@@ -75,6 +76,17 @@ export default async function CarDetailsPage({ params }: Props) {
             {car.plateNumber}
           </p>
         </header>
+
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Link
+            href={`/dashboard/cars/${car.id}/edit`}
+            className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+          >
+            Редактировать
+          </Link>
+
+          <DeleteCarButton carId={car.id} />
+        </div>
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="overflow-hidden rounded-[2rem] border border-neutral-200 dark:border-neutral-800">
