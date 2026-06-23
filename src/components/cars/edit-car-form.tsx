@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageUploadField } from "@/components/image-upload-field";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -157,18 +158,14 @@ export function EditCarForm({ car }: Props) {
           </select>
         </label>
 
-        <label>
-          <span className="mb-2 block text-sm text-neutral-500">
-            Ссылка на фото автомобиля
-          </span>
-
-          <input
-            value={image}
-            onChange={(event) => setImage(event.target.value)}
-            placeholder="Можно оставить пустым"
-            className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
-          />
-        </label>
+        <ImageUploadField
+          label="Фото автомобиля"
+          description="Выберите фото из галереи или сфотографируйте автомобиль."
+          value={image}
+          onChange={setImage}
+          previewAlt="Фото автомобиля"
+          cameraMode="environment"
+        />
 
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">

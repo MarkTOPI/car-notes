@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageUploadField } from "@/components/image-upload-field";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -99,32 +100,14 @@ export function EditProfileForm({ user }: Props) {
           />
         </label>
 
-        <label>
-          <span className="mb-2 block text-sm text-neutral-500">
-            Ссылка на аватар
-          </span>
-
-          <input
-            value={avatar}
-            onChange={(event) => setAvatar(event.target.value)}
-            placeholder="Можно оставить пустым"
-            className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
-          />
-        </label>
-
-        {avatar && (
-          <div className="rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800">
-            <p className="mb-3 text-sm text-neutral-500">
-              Предпросмотр аватара
-            </p>
-
-            <img
-              src={avatar}
-              alt="Аватар"
-              className="h-24 w-24 rounded-full object-cover"
-            />
-          </div>
-        )}
+        <ImageUploadField
+          label="Фото профиля"
+          description="Выберите фото из галереи или сделайте новый снимок."
+          value={avatar}
+          onChange={setAvatar}
+          previewAlt="Аватар"
+          cameraMode="user"
+        />
 
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
