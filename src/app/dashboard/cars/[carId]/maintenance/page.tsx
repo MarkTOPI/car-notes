@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
+import { DeleteMaintenanceButton } from "@/components/maintenance/delete-maintenance-button";
 
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
@@ -119,8 +120,15 @@ export default async function MaintenancePage({ params }: Props) {
                     </h2>
                   </div>
 
-                  <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
-                    {formatMoney(item.cost)}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
+                      {formatMoney(item.cost)}
+                    </div>
+
+                    <DeleteMaintenanceButton
+                      carId={car.id}
+                      maintenanceId={item.id}
+                    />
                   </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
+import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
@@ -138,8 +139,15 @@ export default async function ExpensesPage({ params }: Props) {
                     </p>
                   </div>
 
-                  <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
-                    {formatMoney(item.cost)}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
+                      {formatMoney(item.cost)}
+                    </div>
+
+                    <DeleteExpenseButton
+                      carId={car.id}
+                      expenseId={item.id}
+                    />
                   </div>
                 </div>
 
