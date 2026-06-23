@@ -77,7 +77,15 @@ export default async function ProfilePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/profile/edit"
+              className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+            >
+              Настройки
+            </Link>
+
             <ThemeToggle />
+
             <LogoutButton />
           </div>
         </header>
