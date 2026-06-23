@@ -125,6 +125,13 @@ export default async function MaintenancePage({ params }: Props) {
                       {formatMoney(item.cost)}
                     </div>
 
+                      <Link
+                        href={`/dashboard/cars/${car.id}/maintenance/${item.id}/edit`}
+                        className="rounded-full border border-neutral-200 px-4 py-2 text-sm transition hover:bg-neutral-100 dark:border-neutral-800 dark:hover:bg-neutral-900"
+                      >
+                        Редактировать
+                      </Link>
+
                     <DeleteMaintenanceButton
                       carId={car.id}
                       maintenanceId={item.id}
