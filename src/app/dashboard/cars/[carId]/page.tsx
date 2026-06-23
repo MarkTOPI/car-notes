@@ -163,7 +163,7 @@ export default async function CarDetailsPage({ params }: Props) {
 
             <Link
               href={`/dashboard/cars/${car.id}/expenses`}
-              className="mt-5 inline-flex rounded-2xl bg-black px-5 py-3 text-sm text-white dark:bg-white dark:text-black"
+              className="mt-5 inline-flex rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
             >
               Открыть расходы
             </Link>
