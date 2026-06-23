@@ -131,9 +131,12 @@ export default async function CarDetailsPage({ params }: Props) {
               дата, пробег, работы и стоимость.
             </p>
 
-            <button className="mt-5 rounded-2xl bg-black px-5 py-3 text-sm text-white dark:bg-white dark:text-black">
-              + Добавить ТО
-            </button>
+            <Link
+              href={`/dashboard/cars/${car.id}/maintenance`}
+              className="mt-5 inline-flex rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+            >
+              Открыть ТО
+            </Link>
           </div>
 
           <div className="rounded-[2rem] border border-dashed border-neutral-300 p-6 dark:border-neutral-800">
