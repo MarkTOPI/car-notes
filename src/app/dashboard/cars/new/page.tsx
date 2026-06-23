@@ -1,160 +1,204 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-import { prisma } from "@/lib/db";
-import { authOptions } from "@/lib/auth";
-import { LogoutButton } from "@/components/logout-button";
+export default function NewCarPage() {
+  const router = useRouter();
 
-function formatBodyType(type: string) {
-  const types: Record<string, string> = {
-    SEDAN: "Седан",
-    CROSSOVER: "Кроссовер",
-    SUV: "Внедорожник",
-  };
+  const [name, setName] = useState("");
+  const [plateNumber, setPlateNumber] = useState("");
+  const [mileage, setMileage] = useState("");
+  const [bodyType, setBodyType] = useState("SEDAN");
+  const [color, setColor] = useState("");
+  const [fuelType, setFuelType] = useState("GASOLINE");
+  const [image, setImage] = useState("");
 
-  return types[type] || type;
-}
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-function formatFuelType(type: string) {
-  const types: Record<string, string> = {
-    GASOLINE: "Бензин",
-    DIESEL: "Дизель",
-    HYBRID: "Гибрид",
-    ELECTRIC: "Электро",
-  };
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-  return types[type] || type;
-}
+    setError("");
+    setLoading(true);
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+    try {
+      const response = await fetch("/api/cars", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          plateNumber,
+          mileage,
+          bodyType,
+          color,
+          fuelType,
+          image,
+        }),
+      });
 
-  if (!session?.user?.id) {
-    redirect("/login");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Не удалось добавить автомобиль");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Ошибка подключения к серверу");
+    } finally {
+      setLoading(false);
+    }
   }
-
-  const cars = await prisma.car.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
 
   return (
     <main className="min-h-screen bg-white px-4 py-6 text-black dark:bg-black dark:text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
-              CarNotes
-            </p>
+      <div className="mx-auto max-w-3xl">
+        <header className="mb-8">
+          <Link
+            href="/dashboard"
+            className="text-sm text-neutral-500 underline underline-offset-4"
+          >
+            ← Назад
+          </Link>
 
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Мои автомобили
-            </h1>
+          <p className="mt-6 text-sm uppercase tracking-[0.3em] text-neutral-500">
+            CarNotes
+          </p>
 
-            <p className="mt-2 text-sm text-neutral-500">
-              Добро пожаловать, {session.user.name}
-            </p>
-          </div>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            Добавить автомобиль
+          </h1>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/cars/new"
-              className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
-            >
-              + Добавить автомобиль
-            </Link>
-
-            <LogoutButton />
-          </div>
+          <p className="mt-2 text-sm text-neutral-500">
+            Заполните краткую информацию об автомобиле.
+          </p>
         </header>
 
-        {cars.length === 0 ? (
-          <section className="rounded-[2rem] border border-dashed border-neutral-300 p-8 text-center dark:border-neutral-800">
-            <h2 className="text-xl font-medium">
-              Пока автомобилей нет
-            </h2>
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-[2rem] border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-950 sm:p-8"
+        >
+          <div className="grid gap-5">
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Название автомобиля
+              </span>
 
-            <p className="mx-auto mt-2 max-w-md text-neutral-500">
-              Добавьте первый автомобиль, чтобы вести историю ТО, ремонта,
-              заправок и расходов.
-            </p>
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Например, BMW 520i"
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              />
+            </label>
 
-            <Link
-              href="/dashboard/cars/new"
-              className="mt-6 inline-flex rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white dark:bg-white dark:text-black"
-            >
-              + Добавить автомобиль
-            </Link>
-          </section>
-        ) : (
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {cars.map((car) => (
-              <Link
-                key={car.id}
-                href={`/dashboard/cars/${car.id}`}
-                className="group overflow-hidden rounded-[2rem] border border-neutral-200 bg-white transition hover:-translate-y-1 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Гос. номер
+              </span>
+
+              <input
+                value={plateNumber}
+                onChange={(event) => setPlateNumber(event.target.value)}
+                placeholder="Например, А123ВС777"
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              />
+            </label>
+
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Пробег
+              </span>
+
+              <input
+                type="number"
+                value={mileage}
+                onChange={(event) => setMileage(event.target.value)}
+                placeholder="Например, 120500"
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              />
+            </label>
+
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Тип кузова
+              </span>
+
+              <select
+                value={bodyType}
+                onChange={(event) => setBodyType(event.target.value)}
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
               >
-                <div className="flex h-44 items-center justify-center bg-neutral-100 dark:bg-neutral-900">
-                  {car.image ? (
-                    <img
-                      src={car.image}
-                      alt={car.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-5xl">🚗</div>
-                  )}
-                </div>
+                <option value="SEDAN">Седан</option>
+                <option value="CROSSOVER">Кроссовер</option>
+                <option value="SUV">Внедорожник</option>
+              </select>
+            </label>
 
-                <div className="p-5">
-                  <div className="mb-4 flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        {car.name}
-                      </h2>
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Цвет
+              </span>
 
-                      <p className="mt-1 text-sm text-neutral-500">
-                        {car.plateNumber}
-                      </p>
-                    </div>
+              <input
+                value={color}
+                onChange={(event) => setColor(event.target.value)}
+                placeholder="Например, Черный"
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              />
+            </label>
 
-                    <span className="rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 dark:border-neutral-800">
-                      {formatBodyType(car.bodyType)}
-                    </span>
-                  </div>
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Тип топлива
+              </span>
 
-                  <div className="grid gap-2 text-sm text-neutral-500">
-                    <p>
-                      Пробег:{" "}
-                      <span className="text-black dark:text-white">
-                        {car.mileage.toLocaleString("ru-RU")} км
-                      </span>
-                    </p>
+              <select
+                value={fuelType}
+                onChange={(event) => setFuelType(event.target.value)}
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              >
+                <option value="GASOLINE">Бензин</option>
+                <option value="DIESEL">Дизель</option>
+                <option value="HYBRID">Гибрид</option>
+                <option value="ELECTRIC">Электро</option>
+              </select>
+            </label>
 
-                    <p>
-                      Топливо:{" "}
-                      <span className="text-black dark:text-white">
-                        {formatFuelType(car.fuelType)}
-                      </span>
-                    </p>
+            <label>
+              <span className="mb-2 block text-sm text-neutral-500">
+                Ссылка на фото автомобиля
+              </span>
 
-                    <p>
-                      Цвет:{" "}
-                      <span className="text-black dark:text-white">
-                        {car.color}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </section>
-        )}
+              <input
+                value={image}
+                onChange={(event) => setImage(event.target.value)}
+                placeholder="Можно оставить пустым"
+                className="w-full rounded-2xl border border-neutral-200 bg-transparent px-4 py-3 outline-none transition focus:border-black dark:border-neutral-800 dark:focus:border-white"
+              />
+            </label>
+
+            {error && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+                {error}
+              </div>
+            )}
+
+            <button
+              disabled={loading}
+              className="rounded-2xl bg-black px-5 py-3 font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+            >
+              {loading ? "Сохраняем..." : "Сохранить автомобиль"}
+            </button>
+          </div>
+        </form>
       </div>
     </main>
   );
