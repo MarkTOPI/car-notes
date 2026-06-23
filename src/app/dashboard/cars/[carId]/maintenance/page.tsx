@@ -1,20 +1,16 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
-import { DeleteMaintenanceButton } from "@/components/maintenance/delete-maintenance-button";
 
 import { prisma } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
+import { MaintenanceList } from "@/components/maintenance/maintenance-list";
 
 type Props = {
   params: Promise<{
     carId: string;
   }>;
 };
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("ru-RU").format(date);
-}
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat("ru-RU", {
@@ -51,6 +47,10 @@ export default async function MaintenancePage({ params }: Props) {
     notFound();
   }
 
+  const total = car.maintenances.reduce((sum, item) => {
+    return sum + item.cost;
+  }, 0);
+
   return (
     <main className="min-h-screen bg-white px-4 py-6 text-black dark:bg-black dark:text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
@@ -84,6 +84,16 @@ export default async function MaintenancePage({ params }: Props) {
           </Link>
         </header>
 
+        <section className="mb-6 rounded-[2rem] border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-950">
+          <p className="text-sm text-neutral-500">
+            Всего по ТО
+          </p>
+
+          <p className="mt-2 text-3xl font-semibold">
+            {formatMoney(total)}
+          </p>
+        </section>
+
         {car.maintenances.length === 0 ? (
           <section className="rounded-[2rem] border border-dashed border-neutral-300 p-8 text-center dark:border-neutral-800">
             <h2 className="text-xl font-medium">
@@ -103,48 +113,17 @@ export default async function MaintenancePage({ params }: Props) {
             </Link>
           </section>
         ) : (
-          <section className="grid gap-4">
-            {car.maintenances.map((item) => (
-              <article
-                key={item.id}
-                className="rounded-[2rem] border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-950 sm:p-6"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-sm text-neutral-500">
-                      {formatDate(item.serviceDate)}
-                    </p>
-
-                    <h2 className="mt-2 text-xl font-semibold">
-                      ТО на пробеге {item.mileage.toLocaleString("ru-RU")} км
-                    </h2>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium dark:border-neutral-800">
-                      {formatMoney(item.cost)}
-                    </div>
-
-                      <Link
-                        href={`/dashboard/cars/${car.id}/maintenance/${item.id}/edit`}
-                        className="rounded-full border border-neutral-200 px-4 py-2 text-sm transition hover:bg-neutral-100 dark:border-neutral-800 dark:hover:bg-neutral-900"
-                      >
-                        Редактировать
-                      </Link>
-
-                    <DeleteMaintenanceButton
-                      carId={car.id}
-                      maintenanceId={item.id}
-                    />
-                  </div>
-                </div>
-
-                <p className="mt-5 whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
-                  {item.description}
-                </p>
-              </article>
-            ))}
-          </section>
+          <MaintenanceList
+            carId={car.id}
+            maintenances={car.maintenances.map((item) => ({
+              id: item.id,
+              carId: item.carId,
+              serviceDate: item.serviceDate.toISOString(),
+              mileage: item.mileage,
+              description: item.description,
+              cost: item.cost,
+            }))}
+          />
         )}
       </div>
     </main>
