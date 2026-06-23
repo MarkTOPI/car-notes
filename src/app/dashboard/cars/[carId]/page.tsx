@@ -149,9 +149,12 @@ export default async function CarDetailsPage({ params }: Props) {
               расходы по автомобилю.
             </p>
 
-            <button className="mt-5 rounded-2xl bg-black px-5 py-3 text-sm text-white dark:bg-white dark:text-black">
-              + Добавить расход
-            </button>
+            <Link
+              href={`/dashboard/cars/${car.id}/expenses`}
+              className="mt-5 inline-flex rounded-2xl bg-black px-5 py-3 text-sm text-white dark:bg-white dark:text-black"
+            >
+              Открыть расходы
+            </Link>
           </div>
         </section>
       </div>
